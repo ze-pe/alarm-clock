@@ -36,8 +36,27 @@ def alarm(seconds):
     # Wait for the audio to finish playing
     stdout, stderr = player.communicate()
 
-minutes = int(input("Set the number of minutes for the alarm: "))
-seconds = int(input("Set the number of seconds for the alarm: "))
+# User inputs for minutes and seconds for alarm countdown
+while True:
+    try:
+        minutes = int(input("Set the number of minutes for the alarm: "))
+        if minutes >= 0:
+            break
+        else:
+            print("Please enter a positive integer value.")
+    except ValueError:
+        print("Please enter a positive integer value.")
+
+while True:
+    try:
+        seconds = int(input("Set the number of seconds for the alarm: "))
+        if 0 <= seconds < 60:
+            break
+        else:
+            print("Please enter a valid integer (0-59).")
+    except ValueError:
+        print("Please enter a valid integer (0-59).")
+
 total_seconds = minutes * 60 + seconds
 
 alarm(total_seconds)
