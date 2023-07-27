@@ -1,5 +1,6 @@
 import subprocess
 import time
+import threading
 
 '''
 CLEAR and CLEAR_AND_RETURN are escape sequences in ANSI-compatible terminals that can be used to control the terminal display. These sequences are used to clear the terminal screen and reset the cursor position to the top-left corner.
@@ -7,19 +8,39 @@ CLEAR and CLEAR_AND_RETURN are escape sequences in ANSI-compatible terminals tha
 CLEAR = "\033[2J" # clears the entire terminal screen
 CLEAR_AND_RETURN = "\033[H" # moves the cursor to the top-left corner of the terminal screen
 
+running = True # variable to control the loop state
+
+def key_listener():
+    global running
+    while True:
+        key = input("Press Enter to pause/resume the alarm.")
+        if key == '':
+            running = not running
+            if running:
+                print("Resumed...")
+            else:
+                print("Paused...")
+
 def alarm(seconds):
+    global running
     time_elapsed = 0
 
     print(CLEAR)
     while time_elapsed < seconds:
-        time.sleep(1)
-        time_elapsed += 1
+        if running:
+            time.sleep(1)
+            time_elapsed += 1
 
-        time_remaining = seconds - time_elapsed
-        minutes_remaining = time_remaining // 60
-        seconds_remaining = time_remaining % 60
+            time_remaining = seconds - time_elapsed
+            minutes_remaining = time_remaining // 60
+            seconds_remaining = time_remaining % 60
 
-        print(f"{CLEAR_AND_RETURN}Alarm will sound in: {minutes_remaining:02d}:{seconds_remaining:02d}")
+            print(f"{CLEAR_AND_RETURN}Alarm will sound in: {minutes_remaining:02d}:{seconds_remaining:02d}")
+                
+            print(CLEAR)
+            print(f"{CLEAR_AND_RETURN}Alarm complete.")
+        else:
+            time.sleep(0)
 
     # audio file source: https://orangefreesounds.com/clock-gong-sound/
     audio_file = "alarm.mp3"
@@ -58,5 +79,10 @@ while True:
         print("Please enter a valid integer (0-59).")
 
 total_seconds = minutes * 60 + seconds
+
+# Start the key listener thread
+thread = threading.Thread(target=key_listener)
+thread.daemon = True
+thread.start()
 
 alarm(total_seconds)
